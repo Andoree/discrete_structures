@@ -31,8 +31,6 @@ from typing import Dict, List, Tuple
 def create_t_ib1b2_clauses(num_gates_n: int, num_gates_N: int, disjunctions_list):
     i_range = range(num_gates_n, num_gates_N + num_gates_n)
     for i in i_range:
-        # clauses = (f"t_{i}_0_0", f"-t_{i}_1_0", f"-t_{i}_0_1 | -t_{i}_1_1", f"t_{i}_0_1 | t_{i}_1_1")
-        # TODO: Тут проверить скобки, почему здесь по два отрицания?
         clauses = ((f"t_{i}_0_0", ), (f"-t_{i}_1_0", ),
                    (f"-t_{i}_0_1", f"t_{i}_1_1"), (f"t_{i}_0_1", f"-t_{i}_1_1"))
         disjunctions_list.extend(clauses)
@@ -45,7 +43,7 @@ def create_c_ikj_clauses(num_gates_n: int, num_gates_N: int, disjunctions_list):
     j_range = range(num_gates_N + num_gates_n)
     for (i, k) in product(i_range, k_range):
         # existence_cond_variables = ' | '.join((f"c_{i}_{k}_{j}" for j in j_range))
-        existence_cond_variables = tuple(f"c_{i}_{k}_{j}" for j in j_range)
+        existence_cond_variables = tuple((f"c_{i}_{k}_{j}" for j in j_range))
         disjunctions_list.append(existence_cond_variables)
         for j_1 in j_range:
             for j_2 in range(j_1 + 1, num_gates_N + num_gates_n):
@@ -75,17 +73,16 @@ def create_v_it_input_clauses(num_gates_n: int, input_sets, disjunctions_list):
     i_range = range(num_gates_n)
     t_range = range(2 ** num_gates_n)
     for (i, t) in product(i_range, t_range):
-        # TODO: Запомнить, что инвертировал i t на t i
         input_value = input_sets[t][i]
         sign = '' if input_value == 1 else '-'
         clause = (f"{sign}v_{i}_{t}", )
         disjunctions_list.append(clause)
 
 
-def create_six_clauses(num_gates_n: int, num_gates_N: int, output_size_m: int, values, disjunctions_list):
+def create_six_clauses(num_gates_n: int, num_gates_N: int, disjunctions_list):
     i_range = range(num_gates_n, num_gates_N + num_gates_n)
     t_range = range(2 ** num_gates_n)
-    bit_range = range(output_size_m)
+    bit_range = range(2)
     for (i, r, i_0, i_1) in product(i_range, t_range, bit_range, bit_range):
         for j_0 in range(num_gates_n, i):
             for j_1 in range(j_0 + 1, i):
@@ -105,7 +102,7 @@ def create_six_clauses(num_gates_n: int, num_gates_N: int, output_size_m: int, v
 
 
 def create_output_check_clauses(num_gates_n: int, num_gates_N: int, output_size_m: int, values, disjunctions_list):
-    # TODO: везде проверить рейнджы. Где-то диапазоны не от нуля, а от эн малого до эн большого
+
     i_range = range(num_gates_n, num_gates_N + num_gates_n)
     r_range = range(2 ** num_gates_n)
     k_range = range(output_size_m)
@@ -119,15 +116,13 @@ def create_output_check_clauses(num_gates_n: int, num_gates_N: int, output_size_
 
 def create_clauses(num_gates_n, num_gates_N, output_size_m, output_values):
     input_sets = list(itertools.product((0, 1), repeat=num_gates_n))
-
     clauses_list = []
     create_t_ib1b2_clauses(num_gates_n=num_gates_n, num_gates_N=num_gates_N, disjunctions_list=clauses_list)
     create_c_ikj_clauses(num_gates_n=num_gates_n, num_gates_N=num_gates_N, disjunctions_list=clauses_list)
     create_o_ij_clauses(num_gates_n=num_gates_n, num_gates_N=num_gates_N, output_size_m=output_size_m,
                         disjunctions_list=clauses_list)
     create_v_it_input_clauses(num_gates_n=num_gates_n, input_sets=input_sets, disjunctions_list=clauses_list)
-    create_six_clauses(num_gates_n=num_gates_n, num_gates_N=num_gates_N, output_size_m=output_size_m,
-                       disjunctions_list=clauses_list, values=output_values)
+    create_six_clauses(num_gates_n=num_gates_n, num_gates_N=num_gates_N, disjunctions_list=clauses_list, )
     create_output_check_clauses(num_gates_n=num_gates_n, num_gates_N=num_gates_N, output_size_m=output_size_m,
                                 disjunctions_list=clauses_list, values=output_values)
     print(len(clauses_list))

@@ -118,7 +118,8 @@ def main():
             m = re.fullmatch(c_ikj_pattern, variable_str)
             i = int(m.group("i")) - num_gates_n
             k = int(m.group("k"))
-            j = int(m.group("j")) - 1
+            # TODO : -1 убрал
+            j = int(m.group("j"))
             if sign == 1:
                 C_matrix[i][k][j] = 1
         elif variable_str.startswith('t'):
@@ -130,14 +131,16 @@ def main():
                 T_matrix[i][b1][b2] = 1
         elif variable_str.startswith('o'):
             m = re.fullmatch(o_ij_pattern, variable_str)
-            i = int(m.group("i")) - 1 - num_gates_n
-            j = int(m.group("j")) - 1
+            # TODO: i, t убрал минус 1
+            i = int(m.group("i")) - num_gates_n
+            j = int(m.group("j"))
             if sign == 1:
                 O_matrix[i][j] = 1
         elif variable_str.startswith('v'):
             m = re.fullmatch(v_it_pattern, variable_str)
-            i = int(m.group("i")) - 1
-            t = int(m.group("t")) - 1
+            # TODO: i, t убрал минус 1
+            i = int(m.group("i"))
+            t = int(m.group("t"))
             if sign == 1:
                 V_matrix[i][t] = 1
     create_graphviz_graph(C_matrix=C_matrix, O_matrix=O_matrix, T_matrix=T_matrix, num_gates_n=num_gates_n,
