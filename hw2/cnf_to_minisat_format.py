@@ -33,7 +33,8 @@ def create_t_ib1b2_clauses(num_gates_n: int, num_gates_N: int, disjunctions_list
     for i in i_range:
         # clauses = (f"t_{i}_0_0", f"-t_{i}_1_0", f"-t_{i}_0_1 | -t_{i}_1_1", f"t_{i}_0_1 | t_{i}_1_1")
         # TODO: Тут проверить скобки, почему здесь по два отрицания?
-        clauses = ((f"t_{i}_0_0",), (f"-t_{i}_1_0",), (f"-t_{i}_0_1", f"-t_{i}_1_1"), (f"t_{i}_0_1", f"t_{i}_1_1"))
+        clauses = ((f"t_{i}_0_0", ), (f"-t_{i}_1_0", ),
+                   (f"-t_{i}_0_1", f"-t_{i}_1_1"), (f"t_{i}_0_1", f"t_{i}_1_1"))
         disjunctions_list.extend(clauses)
 
 
@@ -77,7 +78,7 @@ def create_v_it_input_clauses(num_gates_n: int, input_sets, disjunctions_list):
         # TODO: Запомнить, что инвертировал i t на t i
         input_value = input_sets[t][i]
         sign = '' if input_value == 1 else '-'
-        clause = (f"{sign}v_{i}_{t}",)
+        clause = (f"{sign}v_{i}_{t}", )
         disjunctions_list.append(clause)
 
 
@@ -91,9 +92,6 @@ def create_six_clauses(num_gates_n: int, num_gates_N: int, output_size_m: int, v
                 i_0_sign = '-' if i_0 == 1 else ''
                 i_1_sign = '-' if i_1 == 1 else ''
 
-                # clause = f"-c_{i}_{0}_{j_0} | -c_{i}_{1}_{j_1} | {i_0_sign}v_{j_0}{r} | {i_1_sign}v_{j_1}{r} | " \
-                #          f"(v_{i}{r} >> t_{i}_{i_0}_{i_1}) & (t_{i}_{i_0}_{i_1} >> v_{i}{r})"
-                # TODO: Тут добавить какое-то доп.условие на равенство дэшки тому, чему надо
                 clause_1 = (f"-c_{i}_{0}_{j_0}", f"-c_{i}_{1}_{j_1}", f"{i_0_sign}v_{j_0}_{r}",
                             f"{i_1_sign}v_{j_1}_{r}", f"v_{i}_{r}", f"-t_{i}_{i_0}_{i_1}")
                 clause_2 = (f"-c_{i}_{0}_{j_0}", f"-c_{i}_{1}_{j_1}", f"{i_0_sign}v_{j_0}_{r}",
@@ -115,7 +113,6 @@ def create_output_check_clauses(num_gates_n: int, num_gates_N: int, output_size_
         # TODO: Запомнить, что тут инвертировал индексы
         value = values[r][k]
         sign = '' if value == 1 else '-'
-        # clause = f"-o_{i}_{k} | {sign}v_{i}_{r}"
         clause = (f"-o_{i}_{k}", f"{sign}v_{i}_{r}")
         disjunctions_list.append(clause)
 
