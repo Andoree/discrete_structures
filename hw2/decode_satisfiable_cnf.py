@@ -22,7 +22,7 @@ def load_variable2id(path: str):
 
 def load_cnf_solution(path: str):
     with codecs.open(path, 'r', encoding="utf-8") as inp_file:
-        variable_values = [int(x) for x in inp_file.readline().strip().strip()][:-1]
+        variable_values = [int(x) for x in inp_file.readline().strip().split()][:-1]
     return variable_values
 
 
@@ -37,7 +37,10 @@ def create_nodes(dot_digraph: graphviz.Digraph, num_gates_n, output_size_m, T_ma
         t_10 = T_matrix[i][1][0]
         t_11 = T_matrix[i][1][1]
         value_vector_str = f"{t_00}_{t_01}_{t_10}_{t_11}"
+        print(i)
+
         node_function_str = VALUE_VECTOR_STR_TO_BASIS_FUNCTION[value_vector_str]
+        print(node_function_str)
         dot_digraph.node(f"T_{i + 1}", node_function_str)
     for i in range(output_size_m):
         dot_digraph.node(f"y_{i + 1}")
@@ -50,7 +53,7 @@ def create_c_ikj_edges(dot_digraph: graphviz.Digraph, C_matrix):
     num_gates_n = num_gates_n_plus_N - num_gates_N
 
     for (i, k, j) in product(range(num_gates_n, num_gates_n_plus_N), range(2), range(num_gates_n_plus_N)):
-        c_ikj_value = C_matrix[i][k][j]
+        c_ikj_value = C_matrix[i - num_gates_n][k][j]
         if c_ikj_value == 1:
             target_gate_id = f"T_{i - num_gates_n + 1}"
             if j < num_gates_n:
@@ -71,16 +74,16 @@ def create_o_ij_edges(dot_digraph: graphviz.Digraph, num_gates_n, O_matrix):
     output_size_m = O_matrix.shape[1]
 
     for (i, j) in product(range(num_gates_n, num_gates_n_plus_N), range(output_size_m)):
-        o_ij_value = O_matrix[i][j]
+        o_ij_value = O_matrix[i - num_gates_n][j]
         if o_ij_value == 1:
             target_gate_id = f"y_{j + 1}"
             source_gate_id = f"T_{i - num_gates_n + 1}"
             dot_digraph.edge(source_gate_id, target_gate_id)
 
 
-def create_graphviz_graph(C_matrix, O_matrix, num_gates_n,):
+def create_graphviz_graph(C_matrix, O_matrix, T_matrix, num_gates_n, output_size_m):
     dot_digraph = graphviz.Digraph('round-table', comment='The Round Table')
-
+    create_nodes(dot_digraph=dot_digraph, T_matrix=T_matrix, num_gates_n=num_gates_n, output_size_m=output_size_m)
     create_c_ikj_edges(dot_digraph=dot_digraph, C_matrix=C_matrix)
     create_o_ij_edges(dot_digraph=dot_digraph, num_gates_n=num_gates_n, O_matrix=O_matrix)
     dot_digraph.render(directory='graph', view=True)
@@ -114,20 +117,20 @@ def main():
         if variable_str.startswith('c'):
             m = re.fullmatch(c_ikj_pattern, variable_str)
             i = int(m.group("i")) - num_gates_n
-            k = int(m.group("k")) - 1
+            k = int(m.group("k"))
             j = int(m.group("j")) - 1
             if sign == 1:
                 C_matrix[i][k][j] = 1
         elif variable_str.startswith('t'):
             m = re.fullmatch(t_ib1b2_pattern, variable_str)
             i = int(m.group("i")) - num_gates_n
-            b1 = int(m.group("b1")) - 1
-            b2 = int(m.group("b2")) - 1
+            b1 = int(m.group("b1"))
+            b2 = int(m.group("b2"))
             if sign == 1:
                 T_matrix[i][b1][b2] = 1
         elif variable_str.startswith('o'):
             m = re.fullmatch(o_ij_pattern, variable_str)
-            i = int(m.group("i")) - 1
+            i = int(m.group("i")) - 1 - num_gates_n
             j = int(m.group("j")) - 1
             if sign == 1:
                 O_matrix[i][j] = 1
@@ -137,6 +140,8 @@ def main():
             t = int(m.group("t")) - 1
             if sign == 1:
                 V_matrix[i][t] = 1
+    create_graphviz_graph(C_matrix=C_matrix, O_matrix=O_matrix, T_matrix=T_matrix, num_gates_n=num_gates_n,
+                          output_size_m=output_size_m)
 
 
 if __name__ == '__main__':

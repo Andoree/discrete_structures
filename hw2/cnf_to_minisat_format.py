@@ -34,7 +34,7 @@ def create_t_ib1b2_clauses(num_gates_n: int, num_gates_N: int, disjunctions_list
         # clauses = (f"t_{i}_0_0", f"-t_{i}_1_0", f"-t_{i}_0_1 | -t_{i}_1_1", f"t_{i}_0_1 | t_{i}_1_1")
         # TODO: Тут проверить скобки, почему здесь по два отрицания?
         clauses = ((f"t_{i}_0_0", ), (f"-t_{i}_1_0", ),
-                   (f"-t_{i}_0_1", f"-t_{i}_1_1"), (f"t_{i}_0_1", f"t_{i}_1_1"))
+                   (f"-t_{i}_0_1", f"t_{i}_1_1"), (f"t_{i}_0_1", f"-t_{i}_1_1"))
         disjunctions_list.extend(clauses)
 
 
