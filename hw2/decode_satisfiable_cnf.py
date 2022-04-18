@@ -22,32 +22,31 @@ def load_variable2id(path: str):
 
 def load_cnf_solution(path: str):
     with codecs.open(path, 'r', encoding="utf-8") as inp_file:
+        inp_file.readline()
         variable_values = [int(x) for x in inp_file.readline().strip().split()][:-1]
     return variable_values
 
 
 def create_nodes(dot_digraph: graphviz.Digraph, num_gates_n, output_size_m, T_matrix):
-    # TODO: выходные ноды
     num_gates_N = T_matrix.shape[0]
+    # Создание вершин переменных
     for i in range(num_gates_n):
         dot_digraph.node(f"x_{i + 1}")
+    # Создание вершин гейтов
     for i in range(num_gates_N):
         t_00 = T_matrix[i][0][0]
         t_01 = T_matrix[i][0][1]
         t_10 = T_matrix[i][1][0]
         t_11 = T_matrix[i][1][1]
         value_vector_str = f"{t_00}_{t_01}_{t_10}_{t_11}"
-        print(i)
-
         node_function_str = VALUE_VECTOR_STR_TO_BASIS_FUNCTION[value_vector_str]
-        print(node_function_str)
         dot_digraph.node(f"T_{i + 1}", node_function_str)
+    # Создание вершин выходных гейтов
     for i in range(output_size_m):
         dot_digraph.node(f"y_{i + 1}")
 
 
 def create_c_ikj_edges(dot_digraph: graphviz.Digraph, C_matrix):
-    # (num_gates_N, 2, num_gates_n + num_gates_N)
     num_gates_N = C_matrix.shape[0]
     num_gates_n_plus_N = C_matrix.shape[2]
     num_gates_n = num_gates_n_plus_N - num_gates_N
@@ -68,7 +67,6 @@ def create_c_ikj_edges(dot_digraph: graphviz.Digraph, C_matrix):
 
 
 def create_o_ij_edges(dot_digraph: graphviz.Digraph, num_gates_n, O_matrix):
-    # (num_gates_N, 2, num_gates_n + num_gates_N)
     num_gates_N = O_matrix.shape[0]
     num_gates_n_plus_N = num_gates_n + num_gates_N
     output_size_m = O_matrix.shape[1]
@@ -82,7 +80,7 @@ def create_o_ij_edges(dot_digraph: graphviz.Digraph, num_gates_n, O_matrix):
 
 
 def create_graphviz_graph(C_matrix, O_matrix, T_matrix, num_gates_n, output_size_m):
-    dot_digraph = graphviz.Digraph('round-table', comment='The Round Table')
+    dot_digraph = graphviz.Digraph('circuit_graph', comment='Circuit graph')
     create_nodes(dot_digraph=dot_digraph, T_matrix=T_matrix, num_gates_n=num_gates_n, output_size_m=output_size_m)
     create_c_ikj_edges(dot_digraph=dot_digraph, C_matrix=C_matrix)
     create_o_ij_edges(dot_digraph=dot_digraph, num_gates_n=num_gates_n, O_matrix=O_matrix)
@@ -101,7 +99,6 @@ def main():
     v_it_pattern = "v_(?P<i>[0-9]+)_(?P<t>[0-9]+)"
 
     T_matrix = np.zeros(shape=(num_gates_N, 2, 2), dtype=int)  # 16
-    # TODO: С цэшкой осторожнее
     C_matrix = np.zeros(shape=(num_gates_N, 2, num_gates_n + num_gates_N), dtype=int)  # 4 * 2 * 8 = 64
     V_matrix = np.zeros(shape=(num_gates_n + num_gates_N, 2 ** num_gates_n), dtype=int)  # 16 * 16 = 256
     O_matrix = np.zeros(shape=(num_gates_N, output_size_m), dtype=int)  # 8
@@ -118,7 +115,6 @@ def main():
             m = re.fullmatch(c_ikj_pattern, variable_str)
             i = int(m.group("i")) - num_gates_n
             k = int(m.group("k"))
-            # TODO : -1 убрал
             j = int(m.group("j"))
             if sign == 1:
                 C_matrix[i][k][j] = 1
@@ -131,14 +127,12 @@ def main():
                 T_matrix[i][b1][b2] = 1
         elif variable_str.startswith('o'):
             m = re.fullmatch(o_ij_pattern, variable_str)
-            # TODO: i, t убрал минус 1
             i = int(m.group("i")) - num_gates_n
             j = int(m.group("j"))
             if sign == 1:
                 O_matrix[i][j] = 1
         elif variable_str.startswith('v'):
             m = re.fullmatch(v_it_pattern, variable_str)
-            # TODO: i, t убрал минус 1
             i = int(m.group("i"))
             t = int(m.group("t"))
             if sign == 1:
