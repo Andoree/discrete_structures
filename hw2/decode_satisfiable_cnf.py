@@ -88,11 +88,11 @@ def create_graphviz_graph(C_matrix, O_matrix, T_matrix, num_gates_n, output_size
 
 
 def main():
-    variable2id_path = "cnf/variable2id.tsv"
-    input_solved_cnf = "cnf/minisat_output"
-    num_gates_n = 4
-    num_gates_N = 4
-    output_size_m = 2
+    variable2id_path = "cnf/variable2id_2.tsv"
+    input_solved_cnf = "cnf/minisat_output_2"
+    num_gates_n = 2
+    num_gates_N = 2
+    output_size_m = 1
     t_ib1b2_pattern = "t_(?P<i>[0-9]+)_(?P<b1>[0-9]+)_(?P<b2>[0-9]+)"
     c_ikj_pattern = "c_(?P<i>[0-9]+)_(?P<k>[0-9]+)_(?P<j>[0-9]+)"
     o_ij_pattern = "o_(?P<i>[0-9]+)_(?P<j>[0-9]+)"
