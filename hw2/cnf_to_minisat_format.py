@@ -19,7 +19,7 @@ def create_c_ikj_clauses(num_gates_n: int, num_gates_N: int, disjunctions_list):
     k_range = range(2)
     j_range = range(num_gates_N + num_gates_n)
     for (i, k) in product(i_range, k_range):
-        existence_cond_variables = tuple((f"c_{i}_{k}_{j}" for j in range(i))) #range(i)))
+        existence_cond_variables = tuple((f"c_{i}_{k}_{j}" for j in range(i)))  # range(i)))
         disjunctions_list.append(existence_cond_variables)
         for j_1 in j_range:
             for j_2 in range(j_1 + 1, num_gates_N + num_gates_n):
@@ -44,6 +44,7 @@ def create_o_ij_clauses(num_gates_n: int, num_gates_N: int, output_size_m: int, 
 def create_v_it_input_clauses(num_gates_n: int, input_sets, disjunctions_list):
     i_range = range(num_gates_n)
     t_range = range(2 ** num_gates_n)
+    assert len(input_sets) == 2 ** num_gates_n
     for (i, t) in product(i_range, t_range):
         input_value = input_sets[t][i]
         sign = '' if input_value == 1 else '-'
@@ -56,8 +57,11 @@ def create_six_clauses(num_gates_n: int, num_gates_N: int, disjunctions_list):
     t_range = range(2 ** num_gates_n)
     bit_range = range(2)
     for (i, r, i_0, i_1) in product(i_range, t_range, bit_range, bit_range):
-        for j_0 in range(num_gates_n, i):
-            for j_1 in range(j_0 + 1, i):
+        # print('aa', num_gates_n, i)
+        # for j_0 in range(num_gates_n, i + 1):
+        for j_0 in range(0, i):
+            # print('j_0', j_0, num_gates_n, i)
+            for j_1 in range(j_0, i):
                 i_0_sign = '-' if i_0 == 1 else ''
                 i_1_sign = '-' if i_1 == 1 else ''
 
@@ -122,8 +126,8 @@ def create_dimacs_cnf(clauses, variable2id, output_path: str):
 def main():
     num_gates_n = 2
     num_gates_N = 1
-    output_size_m = 2
-    output_values = [(1, 1), (1, 1), (0, 0), (1, 1)]
+    output_size_m = 1
+    output_values = [(1,), (1,), (0, ), (1,)]
     var2id_output_path = "cnf/variable2id.tsv"
     dimacs_cnf_output_path = "cnf/cnf.dimacs"
     clauses = create_clauses(num_gates_n, num_gates_N, output_size_m, output_values)
