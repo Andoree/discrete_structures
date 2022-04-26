@@ -6,6 +6,7 @@ from typing import Dict, List, Tuple
 
 
 def create_t_ib1b2_clauses(num_gates_n: int, num_gates_N: int, disjunctions_list):
+    # i_range = range(num_gates_n, num_gates_N + num_gates_n)
     i_range = range(num_gates_n, num_gates_N + num_gates_n)
     for i in i_range:
         clauses = ((f"t_{i}_0_0",), (f"-t_{i}_1_0",),
@@ -18,7 +19,7 @@ def create_c_ikj_clauses(num_gates_n: int, num_gates_N: int, disjunctions_list):
     k_range = range(2)
     j_range = range(num_gates_N + num_gates_n)
     for (i, k) in product(i_range, k_range):
-        existence_cond_variables = tuple((f"c_{i}_{k}_{j}" for j in j_range if i != j))
+        existence_cond_variables = tuple((f"c_{i}_{k}_{j}" for j in range(i))) #range(i)))
         disjunctions_list.append(existence_cond_variables)
         for j_1 in j_range:
             for j_2 in range(j_1 + 1, num_gates_N + num_gates_n):
@@ -121,10 +122,10 @@ def create_dimacs_cnf(clauses, variable2id, output_path: str):
 def main():
     num_gates_n = 2
     num_gates_N = 1
-    output_size_m = 1
-    output_values = [(1,), (1,), (0,), (1,)]
-    var2id_output_path = "cnf/variable2id_2.tsv"
-    dimacs_cnf_output_path = "cnf/cnf_2.dimacs"
+    output_size_m = 2
+    output_values = [(1, 1), (1, 1), (0, 0), (1, 1)]
+    var2id_output_path = "cnf/variable2id.tsv"
+    dimacs_cnf_output_path = "cnf/cnf.dimacs"
     clauses = create_clauses(num_gates_n, num_gates_N, output_size_m, output_values)
     print(f"Общее число дизъюнктов: {len(clauses)}")
     variable2id = create_variables_to_id_dict(clauses)
